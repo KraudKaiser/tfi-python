@@ -1,28 +1,52 @@
-def crear_pedido():
-    lista_pedidos = {}
-    lista_pedidos["empresa"] = input(f"Porfavor, identifiqué la empresa a nombre del pedido: ")
-    lista_pedidos["fecha_pedido"] = input(f"Ingresé la fecha del pedido. Solicitamos hacerla en el formado dia/mes/año: ")
-    print(f"Ahora, empezara a ingresar uno a uno la cantidad de productos en el pedido")
-    while True:
-        descripcion_pedido, cant_unidades, precio_unitario = mini_pedido()
-        if "productos" in lista_pedidos:
-            lista_pedidos["productos"].append((descripcion_pedido, cant_unidades, precio_unitario))
-        else:
-            lista_pedidos["productos"] = []
-            lista_pedidos["productos"].append((descripcion_pedido, cant_unidades, precio_unitario))
-        pregunta = input("¿Quiere ingresar otro pedido? Si/No. (S/N)")
-        if pregunta == "N" or pregunta == "n":
-            break
-        elif (pregunta != "N" or pregunta != "n") and (pregunta != "S" or pregunta != "s"):
-            print("Porfavor, asegurese de seleccionar S para si, o N para no.")
-    return lista_pedidos
+import validaciones
 
-    
-def mini_pedido():
-    descripcion_pedido = input(f"Ingresé la descripcion del producto: ")
-    cant_unidades = int(input(f"Ingresé la cantidad de unidades del producto: "))
-    monto_total = int(input(f"Ingresé el precio de venta de la unidad: "))
-    precio_unitario = int(monto_total // cant_unidades)
-    return descripcion_pedido,cant_unidades,precio_unitario
+def ingresar_pedidos(anio, trimestre):
+    pedidos = []
+    seguir = "S"
 
-print(crear_pedido())
+    while seguir == "S":
+        empresa = input("Ingrese el nombre de la empresa: ")
+        fecha_valida = False
+        while fecha_valida == False:
+            dia = int(input("Ingrese el dia del pedido: "))
+            mes = int(input("Ingrese el mes del pedido: "))
+            anio_pedido = int(input("Ingrese el año del pedido: "))
+
+            if validaciones.fecha_valida(dia, mes, anio_pedido):
+                if anio_pedido == anio:
+                    if validaciones.fecha_en_trimestre(mes, trimestre):
+                        fecha_valida = True
+                    else:
+                        print("El mes no corresponde al trimestre ingresado")
+                else:
+                    print("El año de la fecha no coincide con el año del informe")
+            else:
+                print("La fecha ingresada no es valida")
+
+        descripcion = input("Ingrese la descripcion del producto: ")
+
+        cantidad = int(input("Ingrese la cantidad de unidades (entre 1 y 999): "))
+        while cantidad < 1 or cantidad > 999:
+            print("La cantidad debe ser mayor a 0 y menor que 1000")
+            cantidad = int(input("Ingrese la cantidad de unidades (entre 1 y 999): "))
+
+        monto = int(input("Ingrese el monto total del pedido (mayor a 9999): "))
+        while monto <= 9999:
+            print("El monto debe ser mayor a 9999")
+            monto = int(input("Ingrese el monto total del pedido (mayor a 9999): "))
+
+        precio_unitario = monto / cantidad
+
+        print("Empresa:", empresa)
+        print("Fecha:", dia, "/", mes, "/", anio_pedido)
+        print("Producto:", descripcion)
+        print("Cantidad:", cantidad)
+        print("Monto total:", monto)
+        print("Precio unitario:", precio_unitario)
+
+        pedido = (empresa, dia, mes, anio_pedido, descripcion, cantidad, monto, precio_unitario)
+
+        pedidos.append(pedido)
+
+        seguir = input("Desea ingresar otro pedido? (S/N): ")
+    return pedidos
